@@ -62,22 +62,31 @@ def make_event(choice, hp, coins):
         random_num = random.randint(1, 2)
         if random_num == 1:
             hp = hp - enemy_dm
-            event_text = f"Enemy attacked! You lost {enemy_dm} HP"
+            event_text = f"\nEnemy attacked! You lost {enemy_dm} HP"
         else:
             coins = coins + coin
-            event_text = f"You found treasure! You get {coin} coins"
+            event_text = f"\nYou found treasure! You get {coin} coins"
     elif choice == 2:
-        hp = hp + heal_amount
-        event_text = f"You healed {heal_amount} HP"
+        if can_rest(hp):
+            hp += heal_amount
+            hp = min(hp, start_hp)
+            event_text = f"\nYou healed {heal_amount} HP"
+        else:
+            event_text = "\nYou are already at maximum HP. Rest is not needed."
     elif choice == 3:
         random_num = random.randint(1, 2)
         if random_num == 1:
             hp = hp - trap_dm
-            event_text = f"Trap! You lost {trap_dm} HP"
+            event_text = f"\nTrap! You lost {trap_dm} HP"
         else:
             coins += coin*2
-            event_text = f"You found BIG treasure! You get {coin*2} coins"
+            event_text = f"\nYou found BIG treasure! You get {coin*2} coins"
     return hp,coins, event_text
+
+def can_rest(hp):
+    if hp >= start_hp:
+        return False
+    return True
 
 def print_status(turn, hp, coins):
     print("Turn:", turn)
@@ -100,17 +109,39 @@ def game_over(turn, hp):
 
 
 def save_score(name, turn, coins):
-    pass
-
+    with open("scores.txt", "a") as f:
+        f.write(f"{name},{turn},{coins}\n")
 
 def load_score():
-    pass
+    scores = []
+    try:
+        with open("scores.txt", "r") as f:
+            for line in f:
+                line = line.strip()
+                if line == "":
+                    continue
 
+                parts = line.split(",")
+                name = parts[0]
+                turn = int(parts[1])
+                coins = int(parts[2])
+                scores.append((name, turn, coins))
+    except FileNotFoundError:
+        return []
+    return scores
 
 def show_score():
-    pass
-
-
+    scores = load_score()
+    print("\n=====RESULTS=====")
+    if len(scores) == 0:
+        print("No scores saved")
+    i = 1
+    for score in scores:
+        name = score[0]
+        turn = score[1]
+        coins = score[2]
+        print(f"{i}. {name} --Turns: {turn}, Coins: {coins}")
+        i += 1
 
 while True:
     mode = show_menu()
