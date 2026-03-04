@@ -225,7 +225,7 @@ def start_game(lang):
             print(t(lang, "hc_block"))
             continue
 
-        hp, coins, used_turn = make_event(choice, hp, coins, dmg_mult, coin_mult, lang)
+        hp, coins, event_text, used_turn = make_event(choice, hp, coins, dmg_mult, coin_mult, lang)
 
         if game_mode == "4" and choice == 2 and used_turn:
             rests_left -= 1
@@ -270,7 +270,7 @@ def player_choice(lang):
             print(t(lang, "invalid_option"))
 
 
-def make_event(choice, hp, coins, dmg_mult, coin_mult):
+def make_event(choice, hp, coins, dmg_mult, coin_mult, lang):
     event_text = ""
     used_turn = True
     if choice == 1:
@@ -321,9 +321,9 @@ def hp_bar(hp, max_hp):
     empty = bar_len - filled
     return "[" + "█" * filled + "░" * empty + "]"
 
-def print_status(turn, hp, coins):
+def print_status(turn, hp, coins, lang):
     print(t(lang, "turn"), turn)
-    print(t(lang, "hp"), hp_bar(hp), f"{hp}/{start_hp}")
+    print(t(lang, "hp"), hp_bar(hp, start_hp), f"{hp}/{start_hp}")
     print(t(lang, "coins"), coins)
     print("------------------")
 
@@ -373,11 +373,12 @@ def load_score():
         return []
     return scores
 
-def show_score():
+def show_score(lang):
     scores = load_score()
     print("\n=====RESULTS=====")
     if len(scores) == 0:
-        print("No scores saved")
+        print(t(lang, "no_scores"))
+        return
     i = 1
     for score in scores:
         name = score[0]
